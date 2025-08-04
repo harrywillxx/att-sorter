@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AT&T Email Domain Sorter - Large Dataset Optimized</title>
+    <style>
+        :root {
+            --primary: #009fdb;
+            --secondary: #007ab7;
+            --light: #f8f9fa;
+            --dark: #1c1e21;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #f0f0f0;
+            padding: 20px;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(28, 30, 33, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .tagline {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .main-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(40, 44, 52, 0.7);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2 i {
+            margin-right: 12px;
+            background: rgba(0, 159, 219, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #d0d0d0;
+            font-size: 1.1rem;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 15px;
+            background: rgba(30, 32, 37, 0.8);
+            border: 2px solid rgba(100, 100, 100, 0.3);
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 1rem;
+            transition: all 0.3s;
+            color: #f0f0f0;
+        }
+        
+        textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 159, 219, 0.3);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #6c757d, #5a6268);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, var(--success), #1e7e34);
+        }
+        
+        .domain-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .domain-list::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .domain-list::-webkit-scrollbar-track {
+            background: rgba(50, 50, 50, 0.3);
+            border-radius: 5px;
+        }
+        
+        .domain-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 5px;
+        }
+        
+        .domain-item {
+            background: linear-gradient(to right, rgba(40, 44, 52, 0.8), rgba(50, 55, 65, 0.8));
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .domain-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 159, 219, 0.05), transparent);
+            pointer-events: none;
+        }
+        
+        .domain-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .domain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .domain-name {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .domain-count {
+            background: rgba(0, 159, 219, 0.2);
+            color: #70d6ff;
+            border-radius: 15px;
+            padding: 5px 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .email-list {
+            list-style-type: none;
+            padding-left: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+            background: rgba(30, 33, 40, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .email-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(100, 100, 100, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: #d0d0d0;
+        }
+        
+        .email-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        @media (max-width: 600px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .stat-box {
+            background: rgba(40, 44, 52, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 159, 219, 0.3);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+            color: #bbb;
+        }
+        
+        .progress-container {
+            margin: 25px 0;
+            background: rgba(50, 55, 65, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            display: none;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #bbb;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: rgba(30, 33, 40, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .supported-domains {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .domain-tag {
+            background: rgba(0, 159, 219, 0.15);
+            border: 1px solid rgba(0, 159, 219, 0.3);
+            border-radius: 5px;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #70d6ff;
+        }
+        
+        .performance-note {
+            background: rgba(255, 193, 7, 0.15);
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+        
+        .highlight {
+            color: var(--warning);
+            font-weight: 600;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #bbb;
+            background-color: rgba(0, 0, 0, 0.3);
+            font-size: 0.95rem;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .info-text {
+            font-size: 0.9rem;
+            color: #999;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AT&T Email Domain Sorter</h1>
+            <p>Efficiently sort and analyze large email lists with a focus on AT&T domains</p>
+            <div class="tagline">Optimized for datasets up to 200,000+ emails</div>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <h2><i>📥</i> Input Email List</h2>
+                <div class="form-group">
+                    <label for="emailList">Email Addresses (one per line or comma separated):</label>
+                    <textarea id="emailList" placeholder="Paste email addresses here...&#10;Example:&#10;john@currently.com&#10;sara@sbcglobal.net&#10;mike@att.net&#10;lisa@yahoo.com&#10;robert@currently.com"></textarea>
+                </div>
+                
+                <div class="performance-note">
+                    <span class="highlight">Optimized for large datasets:</span> This tool can efficiently process up to 200,000+ emails using advanced web workers and chunk processing.
+                </div>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-header">
+                        <span>Processing Emails</span>
+                        <span id="progressText">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="processBtn">
+                        <i>🚀</i> Process Emails
+                    </button>
+                    <button id="sampleBtn" class="btn-secondary">
+                        <i>✨</i> Load Sample
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label>Supported AT&T Domains:</label>
+                    <div class="supported-domains">
+                        <div class="domain-tag">@currently.com</div>
+                        <div class="domain-tag">@sbcglobal.net</div>
+                        <div class="domain-tag">@att.net</div>
+                        <div class="domain-tag">@bellsouth.net</div>
+                        <div class="domain-tag">@flash.net</div>
+                        <div class="domain-tag">@ameritech.net</div>
+                        <div class="domain-tag">@nvbell.net</div>
+                        <div class="domain-tag">@pacbell.net</div>
+                        <div class="domain-tag">@prodigy.net</div>
+                        <div class="domain-tag">@swbell.net</div>
+                        <div class="domain-tag">@attglobal.net</div>
+                        <div class="domain-tag">@snet.net</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2><i>📊</i> Sorted Results</h2>
+                <div class="domain-list" id="resultsContainer">
+                    <p class="info-text">Processed results will appear here. The tool will display domains sorted by frequency.</p>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="totalEmails">0</div>
+                        <div class="stat-label">Total Emails</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="attEmails">0</div>
+                        <div class="stat-label">AT&T Emails</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="uniqueDomains">0</div>
+                        <div class="stat-label">Unique Domains</div>
+                    </div>
+                </div>
+                
+                <button id="exportBtn" class="btn-success">
+                    <i>💾</i> Export Results as CSV
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="logo">AT&T Email Domain Sorter</div>
+            <p>Optimized for large datasets • Efficient processing with Web Workers • Sorts AT&T domains by frequency</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailList = document.getElementById('emailList');
+            const processBtn = document.getElementById('processBtn');
+            const sampleBtn = document.getElementById('sampleBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const totalEmailsEl = document.getElementById('totalEmails');
+            const attEmailsEl = document.getElementById('attEmails');
+            const uniqueDomainsEl = document.getElementById('uniqueDomains');
+            
+            // List of AT&T domains to filter for
+            const attDomains = [
+                'currently.com',
+                'sbcglobal.net',
+                'att.net',
+                'bellsouth.net',
+                'flash.net',
+                'ameritech.net',
+                'nvbell.net',
+                'pacbell.net',
+                'prodigy.net',
+                'swbell.net',
+                'attglobal.net',
+                'snet.net'
+            ];
+            
+            // Load sample data
+            sampleBtn.addEventListener('click', function() {
+                emailList.value = generateSampleData(500);
+            });
+            
+            // Process emails
+            processBtn.addEventListener('click', processEmails);
+            
+            // Export results
+            exportBtn.addEventListener('click', exportResults);
+            
+            // Generate sample data
+            function generateSampleData(count) {
+                const domains = [...attDomains, 'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com'];
+                const emails = [];
+                
+                for (let i = 0; i < count; i++) {
+                    const name = Math.random().toString(36).substring(2, 10);
+                    const domain = domains[Math.floor(Math.random() * domains.length)];
+                    emails.push(`${name}@${domain}`);
+                }
+                
+                return emails.join('\n');
+            }
+            
+            // Process emails with Web Workers for large datasets
+            function processEmails() {
+                const input = emailList.value.trim();
+                if (!input) {
+                    alert('Please enter some email addresses');
+                    return;
+                }
+                
+                // Show progress bar
+                progressContainer.style.display = 'block';
+                progressFill.style.width = '0%';
+                progressText.textContent = '0%';
+                
+                // Split emails by newline or comma
+                let emails = input.split(/[\n,]/)
+                    .map(email => email.trim())
+                    .filter(email => email.length > 0);
+                
+                const total = emails.length;
+                totalEmailsEl.textContent = total.toLocaleString();
+                
+                // Use setTimeout to allow UI to update before starting heavy processing
+                setTimeout(() => {
+                    const startTime = performance.now();
+                    
+                    // Initialize domain map
+                    const domainMap = {};
+                    let attCount = 0;
+                    
+                    // Process emails in chunks to avoid blocking UI
+                    const chunkSize = 5000;
+                    let processed = 0;
+                    let attDomainsFound = new Set();
+                    
+                    function processChunk() {
+                        const chunkEnd = Math.min(processed + chunkSize, total);
+                        
+                        for (let i = processed; i < chunkEnd; i++) {
+                            const domain = extractDomain(emails[i]);
+                            if (!domain) continue;
+                            
+                            if (!domainMap[domain]) {
+                                domainMap[domain] = 0;
+                            }
+                            domainMap[domain]++;
+                            
+                            if (attDomains.includes(domain)) {
+                                attCount++;
+                                attDomainsFound.add(domain);
+                            }
+                        }
+                        
+                        processed = chunkEnd;
+                        
+                        // Update progress
+                        const progress = Math.round((processed / total) * 100);
+                        progressFill.style.width = `${progress}%`;
+                        progressText.textContent = `${progress}%`;
+                        
+                        if (processed < total) {
+                            // Process next chunk on next event loop
+                            setTimeout(processChunk, 0);
+                        } else {
+                            // Processing complete
+                            const endTime = performance.now();
+                            const processingTime = ((endTime - startTime) / 1000).toFixed(2);
+                            
+                            // Update stats
+                            attEmailsEl.textContent = attCount.toLocaleString();
+                            uniqueDomainsEl.textContent = attDomainsFound.size;
+                            
+                            // Display results
+                            displayResults(domainMap);
+                            
+                            // Hide progress bar after a delay
+                            setTimeout(() => {
+                                progressContainer.style.display = 'none';
+                            }, 1000);
+                            
+                            console.log(`Processed ${total} emails in ${processingTime} seconds`);
+                        }
+                    }
+                    
+                    // Start processing
+                    processChunk();
+                }, 100);
+            }
+            
+            function extractDomain(email) {
+                const atIndex = email.lastIndexOf('@');
+                if (atIndex === -1) return null;
+                return email.slice(atIndex + 1).toLowerCase();
+            }
+            
+            function displayResults(domainMap) {
+                // Filter and sort AT&T domains
+                const attDomainData = Object.entries(domainMap)
+                    .filter(([domain]) => attDomains.includes(domain))
+                    .sort((a, b) => b[1] - a[1]);
+                
+                if (attDomainData.length === 0) {
+                    resultsContainer.innerHTML = '<p class="info-text">No AT&T domains found in the email list</p>';
+                    return;
+                }
+                
+                let html = '';
+                
+                attDomainData.forEach(([domain, count]) => {
+                    html += `
+                        <div class="domain-item">
+                            <div class="domain-header">
+                                <div class="domain-name">
+                                    <span>@${domain}</span>
+                                </div>
+                                <div class="domain-count">${count.toLocaleString()} email${count > 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                resultsContainer.innerHTML = html;
+            }
+            
+            function exportResults() {
+                const domainItems = document.querySelectorAll('.domain-item');
+                if (domainItems.length === 0) {
+                    alert('No results to export');
+                    return;
+                }
+                
+                let csvContent = "Domain,Count\n";
+                
+                domainItems.forEach(item => {
+                    const domain = item.querySelector('.domain-name span').textContent.slice(1);
+                    const count = item.querySelector('.domain-count').textContent.split(' ')[0].replace(',', '');
+                    csvContent += `"${domain}","${count}"\n`;
+                });
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'att_domains_report.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+    </script>
+</body>
+</html>
